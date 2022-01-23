@@ -15,7 +15,7 @@ lazy_static! {
         ".dll", ".exe", ".ini", ".txt", ".doc", "docx", ".xls", "xlsx", ".ppt", "pptx", ".avi", "aiff", ".aif", ".bat",
         ".bmp", "class", "java", ".csv", ".cvs", "idea", "vscode", ".git", "github", ".dbf", ".dif", ".eps", ".fm3",
         ".gif", ".hqx", ".html", "html", ".jpg", "jpeg", ".mac", ".map", ".mdb", "mdbx", ".mid", ".midi", ".mov",
-        ".mtb", ".mtw", ".pdf", ".p65", ".t65", ".png", ".psd", ".qxd", ".cdr", ".cdw", ".iso", ".rtf", ".sit", ".tar"
+        ".mtb", ".mtw", ".pdf", ".p65", ".t65", ".png", ".psd", ".qxd", ".cdr", ".cdw", ".iso", ".rtf", ".sit", ".tar",
         ".tif", "tiff", ".wav", "flac", ".wk3", ".mp3", ".wks", ".wpd", ".wp5", ".zip", ".img"
     ];
     static ref EMAIL: Regex = Regex::new(r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z0-9\-]*$").unwrap();
