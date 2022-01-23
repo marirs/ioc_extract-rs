@@ -9,7 +9,7 @@ Extract indicators like urls,domains,ip,emails,etc... from a given string or a T
 
 ### Requirements
 
-- Rust 1.50+
+- Rust 1.56+ (edition 2021)
 
 ### Example
 ```rust
