@@ -4,6 +4,7 @@ extern crate lazy_static;
 pub(crate) mod validators;
 use serde::{Deserialize, Serialize};
 use validators::{crypto, internet, network};
+use std::{path::Path, fs::read_to_string, io::Result};
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct Indicators {
@@ -13,6 +14,20 @@ pub struct Indicators {
     pub ip_address: Option<Vec<String>>,
     pub crypto: Option<Vec<String>>,
     pub registry: Option<Vec<String>>,
+}
+
+pub fn extract_from_file<P: AsRef<Path>>(file: P) -> Result<Option<Indicators>> {
+    //! Extracts Indicators from a given file
+    //!
+    //! ## Example Usage
+    //! ```rust
+    //! use ioc_extract::extract_from_file;
+    //!
+    //! let f = "assets/sample.txt";
+    //! println!("{:?}", extract_from_file(f));
+    //! ```
+    let f = read_to_string(file)?;
+    Ok(extract(&f))
 }
 
 pub fn extract(s: &str) -> Option<Indicators> {

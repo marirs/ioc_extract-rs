@@ -5,6 +5,7 @@ authors = ["Marirs <marirs@gmail.com>"]
 description = "Extract indicators like urls,domains,ip,emails,etc... from a given string"
 keywords = ["ioc", "indicators", "emails", "domains", "urls"]
 readme = "README.md"
+exclude = ["assets", "examples"]
 edition = "2021"
 
 [dependencies]

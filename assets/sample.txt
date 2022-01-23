@@ -1,0 +1,11 @@
+there are ips in this test
+192.168.21.21 and ::ffff:127.0.0.1
+the cidrs are:
+2001:0DB8:1234::/48 and
+10.0.0.0/8
+
+check out https://www.google.com or www.google.com
+
+Also please send some crypto here:
+1GiWxH6PzSSmbdcK72XfGpqhjSb6nae6h9
+email: 1GiWxH6PzSSmbdcK72XfGpqhjSb6nae6h9@protonmail.com
