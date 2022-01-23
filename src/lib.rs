@@ -56,7 +56,7 @@ pub fn extract(s: &str) -> Option<Indicators> {
             ip_address.push(x.to_string())
         } else if crypto::is_cryptocurrency_any(x) {
             crypto_address.push(x.to_string())
-        } if internet::is_domain(x) {
+        } else if internet::is_domain(x) {
             domains.push(x.to_string())
         } else if internet::is_url(x) {
             urls.push(x.to_string())
