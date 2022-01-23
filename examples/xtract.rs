@@ -5,6 +5,4 @@ fn main() {
     let x = x.to_owned() + "check out https://www.google.com or www.google.com";
     let ioc = extract(&x);
     println!("IOC's:\n{:#?}", ioc);
-    let ips = ioc.unwrap().ip_address;
-    println!("IP's:\n{:#?}", ips);
 }
