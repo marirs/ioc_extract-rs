@@ -11,7 +11,11 @@ lazy_static! {
         ].join("")
     ).unwrap();
     static ref DOMAIN_WHITELIST: Vec<&'static str> = vec!["localhost"];
-    static ref FILE_EXT: Vec<&'static str> = vec!["dll", "exe", "ini", "txt", "doc", "docx", "xls", "xlsx"];
+    static ref FILE_EXT: Vec<&'static str> = vec![
+        ".dll", ".exe", ".ini", ".txt", ".doc", "docx", ".xls", "xlsx", ".ppt", "pptx", ".avi", "aiff", ".aif", ".bat",
+        ".bmp", "class", "java", ".csv", ".cvs", "idea", "vscode", ".git", "github", ".dbf", ".dif", ".eps", ".fm3",
+        ".gif", ".hqx"
+    ];
     static ref EMAIL: Regex = Regex::new(r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z0-9\-]*$").unwrap();
     static ref EMAIL_DOMAIN: Regex = Regex::new(
         &[
@@ -113,12 +117,13 @@ lazy_static! {
 
 fn is_tld_valid(domain: &str) -> bool {
     //! Checks to see if a Given Domain contains a valid tld like
-    //! NO numbers or special characters.
+    //! NO numbers or special characters or file extensions.
     let parts: Vec<&str> = domain.splitn(2, '.').collect();
     if parts.len() > 1 {
         // Check to see if TLD contains numbers
         // Before IDN conversion; tld will not have numbers
-        let tld = parts[1];
+        let tld = parts[1].to_lowercase();
+        println!("tld: {}", tld);
         if tld
             .chars()
             .map(|c| (c.is_alphabetic() || c == '.'))
@@ -126,11 +131,7 @@ fn is_tld_valid(domain: &str) -> bool {
         {
             // make sure that we dont
             // have numbers in the tld
-            return false
-        }
-        // make sure its not a file
-        if FILE_EXT.contains(&tld) {
-            return false
+            return false;
         }
     }
     // TLD not present
@@ -187,8 +188,16 @@ pub fn is_domain(value: &str) -> bool {
         }
     };
 
+    let x_len = x.len();
+    if x_len > 4 {
+        if FILE_EXT.contains(&&x[x_len - 4..]) {
+            // probable file name found
+            return false
+        }
+    }
+
     if DOMAIN.is_match(&x) {
-        return true;
+        return true
     }
 
     false
@@ -256,6 +265,7 @@ mod tests {
         assert!(!is_domain("http://www.транспорт.com"));
         assert!(!is_domain("https://www.example.com"));
         assert!(!is_domain("example.com invalid"));
+        assert!(!is_domain("kernel32.DLL"));
     }
 
     #[test]
