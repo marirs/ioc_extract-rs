@@ -191,11 +191,9 @@ pub fn is_domain(value: &str) -> bool {
     };
 
     let x_len = x.len();
-    if x_len > 4 {
-        if FILE_EXT.contains(&&x[x_len - 4..]) {
-            // probable file name found
-            return false
-        }
+    if x_len > 4 && FILE_EXT.contains(&&x[x_len - 4..]) {
+        // probable file name found
+        return false
     }
 
     if DOMAIN.is_match(&x) {
