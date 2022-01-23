@@ -11,6 +11,7 @@ lazy_static! {
         ].join("")
     ).unwrap();
     static ref DOMAIN_WHITELIST: Vec<&'static str> = vec!["localhost"];
+    static ref FILE_EXT: Vec<&'static str> = vec!["dll", "exe", "ini", "txt", "doc", "docx", "xls", "xlsx"];
     static ref EMAIL: Regex = Regex::new(r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z0-9\-]*$").unwrap();
     static ref EMAIL_DOMAIN: Regex = Regex::new(
         &[
@@ -125,7 +126,11 @@ fn is_tld_valid(domain: &str) -> bool {
         {
             // make sure that we dont
             // have numbers in the tld
-            return false;
+            return false
+        }
+        // make sure its not a file
+        if FILE_EXT.contains(&tld) {
+            return false
         }
     }
     // TLD not present

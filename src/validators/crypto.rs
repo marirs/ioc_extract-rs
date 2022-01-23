@@ -79,9 +79,12 @@ impl Type {
 
 /// Evaluate CryptoCurrency & Validate
 fn validate(value: &str) -> bool {
-    for cryptocurrency in Type::all() {
-        if cryptocurrency.pattern().is_match(value) {
-            return true;
+    // have a min of 15 chars at-least before evaluating
+    if value.chars().count() > 15 {
+        for cryptocurrency in Type::all() {
+            if cryptocurrency.pattern().is_match(value) {
+                return true;
+            }
         }
     }
     false
