@@ -9,8 +9,9 @@ edition = "2021"
 
 [dependencies]
 idna = "0.2"
-regex = "1"
 lazy_static = "1"
+regex = "1"
+serde = { version = "1", features = ["derive"] }
 
 [lib]
 name = "ioc_extract"
