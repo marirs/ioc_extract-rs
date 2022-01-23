@@ -1,6 +1,11 @@
 # IOC Extract
+[![Linux x86_64](https://github.com/marirs/ioc_extract-rs/actions/workflows/linux_x86_64.yml/badge.svg)](https://github.com/marirs/ioc_extract-rs/actions/workflows/linux_x86_64.yml)
+[![Linux Arm7](https://github.com/marirs/ioc_extract-rs/actions/workflows/linux_arm.yml/badge.svg)](https://github.com/marirs/ioc_extract-rs/actions/workflows/linux_arm.yml)
+[![macOS](https://github.com/marirs/ioc_extract-rs/actions/workflows/macos.yml/badge.svg)](https://github.com/marirs/ioc_extract-rs/actions/workflows/macos.yml)
+[![Windows](https://github.com/marirs/ioc_extract-rs/actions/workflows/windows.yml/badge.svg)](https://github.com/marirs/ioc_extract-rs/actions/workflows/windows.yml)
+[![GitHub license](https://img.shields.io/github/license/marirs/ioc_extract-rs)](https://github.com/marirs/ioc_extract-rs/blob/master/LICENSE)
 
-Extract indicators like urls,domains,ip,emails,etc... from a given string.
+Extract indicators like urls,domains,ip,emails,etc... from a given string or a Text file.
 
 ### Requirements
 
