@@ -1,0 +1,4 @@
+[package]
+name = "ioc_extract"
+authors = ["Marirs <marirs@gmail.com>]
+description = "Extract indicators like urls,domains,ip,emails,etc... from a given string"
