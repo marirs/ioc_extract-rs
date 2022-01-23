@@ -24,9 +24,7 @@ pub fn is_ipv4_cidr(value: &str) -> bool {
 
     let nsuffix: u32 = match suffix.parse() {
         Ok(x) => x,
-        Err(_) => {
-            return false;
-        }
+        Err(_) => return false,
     };
 
     if nsuffix > 32 {
@@ -64,9 +62,7 @@ pub fn is_ipv6_cidr(value: &str) -> bool {
 
     let nsuffix: u32 = match suffix.parse() {
         Ok(x) => x,
-        Err(_) => {
-            return false;
-        }
+        Err(_) => return false,
     };
 
     if nsuffix > 128 {
@@ -92,9 +88,7 @@ pub fn is_ip_loopback(value: &str) -> bool {
 
 pub fn is_ipv_any(value: &str) -> bool {
     //! Check to see if a given value corresponds to any IP Address.
-    if is_ipv4(value) {
-        return true;
-    } else if is_ipv6(value) {
+    if is_ipv4(value) || is_ipv6(value) {
         return true;
     }
     false
@@ -102,9 +96,7 @@ pub fn is_ipv_any(value: &str) -> bool {
 
 pub fn is_ip_cidr_any(value: &str) -> bool {
     //! Check to see if a given value corresponds to any IP CIDR.
-    if is_ipv4_cidr(value) {
-        return true;
-    } else if is_ipv6_cidr(value) {
+    if is_ipv4_cidr(value) || is_ipv6_cidr(value) {
         return true;
     }
     false
@@ -176,10 +168,25 @@ mod tests {
 
     #[test]
     fn test_is_ipv_any() {
+        // valid
         assert!(is_ipv_any("127.0.0.1"));
         assert!(is_ipv_any("::1"));
+
+        // not valid
+        assert!(!is_ipv_any("127.0.0.1.36"));
+        assert!(!is_ipv_any("2A00:17C8:50C:0000:0000:0000:0000:00001"));
     }
 
+    #[test]
+    fn test_is_ip_cidr_any() {
+        // valid
+        assert!(is_ip_cidr_any("2001:0DB8:1234::/48"));
+        assert!(is_ip_cidr_any("10.0.0.0/8"));
+
+        // not valid
+        assert!(!is_ip_cidr_any("2002:::1234::/48"));
+        assert!(!is_ip_cidr_any("10.0.0.0/33"));
+    }
     #[test]
     fn test_which_ipv() {
         assert_eq!(which_ipv("::1"), Some("IPv6"));

@@ -113,16 +113,16 @@ lazy_static! {
 fn is_tld_valid(domain: &str) -> bool {
     //! Checks to see if a Given Domain contains a valid tld like
     //! NO numbers or special characters.
-    let parts: Vec<&str> = domain.splitn(2, ".").collect();
+    let parts: Vec<&str> = domain.splitn(2, '.').collect();
     if parts.len() > 1 {
         // Check to see if TLD contains numbers
         // Before IDN conversion; tld will not have numbers
         let tld = parts[1];
-        let tld_valid: Vec<bool> = tld
+        if tld
             .chars()
             .map(|c| (c.is_alphabetic() || c == '.'))
-            .collect();
-        if tld_valid.contains(&false) {
+            .any(|x| !x)
+        {
             // make sure that we dont
             // have numbers in the tld
             return false;

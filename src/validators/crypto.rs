@@ -80,7 +80,7 @@ impl Type {
 /// Evaluate CryptoCurrency & Validate
 fn validate(value: &str) -> bool {
     for cryptocurrency in Type::all() {
-        if cryptocurrency.pattern().is_match(&value) {
+        if cryptocurrency.pattern().is_match(value) {
             return true;
         }
     }
@@ -141,7 +141,7 @@ pub fn is_cryptocurrency_any(value: &str) -> bool {
 pub fn which_cryptocurrency(value: &str) -> Option<&str> {
     //! Output the Crypto Currency Name given the cryptocurrencty address.
     for cryptocurrency in Type::all() {
-        if cryptocurrency.pattern().is_match(&value) {
+        if cryptocurrency.pattern().is_match(value) {
             return Some(cryptocurrency.name());
         }
     }
