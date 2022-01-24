@@ -161,9 +161,7 @@ pub fn is_email(value: &str, whitelist: Option<Vec<&str>>) -> bool {
     // Convert to IDN
     let user_part = match domain_to_ascii(user_part) {
         Ok(x) => x,
-        Err(_) => {
-            return false;
-        }
+        Err(_) => return false,
     };
     if user_part.len() > 64 {
         return false;
@@ -171,9 +169,7 @@ pub fn is_email(value: &str, whitelist: Option<Vec<&str>>) -> bool {
     // Convert to IDN
     let domain_part = match domain_to_ascii(domain_part) {
         Ok(x) => x,
-        Err(_) => {
-            return false;
-        }
+        Err(_) => return false,
     };
     let value = format!("{}@{}", user_part, domain_part);
 
@@ -185,19 +181,11 @@ pub fn is_domain(value: &str) -> bool {
     //! Check if the given value is a Domain Name.
     let x = match domain_to_ascii(value) {
         Ok(x) => x,
-        Err(_) => {
-            return false;
-        }
+        Err(_) => return false,
     };
 
-    let x_len = x.len();
-    if x_len > 4 && FILE_EXT.contains(&&x[x_len - 4..]) {
-        // probable file name found
-        return false
-    }
-
-    if DOMAIN.is_match(&x) {
-        return true
+    if DOMAIN.is_match(&x) && !FILE_EXT.iter().any(|&suffix| x.ends_with(suffix)) {
+        return true;
     }
 
     false

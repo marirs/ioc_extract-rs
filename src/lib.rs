@@ -4,8 +4,9 @@ extern crate lazy_static;
 pub(crate) mod validators;
 
 use serde::{Deserialize, Serialize};
-use std::{fs::read_to_string, io::Result, path::Path};
+use std::{fs::read_to_string, io::Result, path::Path, sync::{Arc, Mutex}};
 use validators::{crypto, internet, network};
+use rayon::prelude::*;
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct Indicators {
@@ -41,30 +42,47 @@ pub fn extract(s: &str) -> Option<Indicators> {
     //! let x = "this is an IP address: 192.168.2.11";
     //! println!("{:?}", x);
     //! ```
-    let mut urls = vec![];
-    let mut domains = vec![];
-    let mut emails = vec![];
-    let mut ip_address = vec![];
-    let mut crypto_address = vec![];
+    let urls = Arc::new(Mutex::new(vec![]));
+    let domains = Arc::new(Mutex::new(vec![]));
+    let emails = Arc::new(Mutex::new(vec![]));
+    let ip_address = Arc::new(Mutex::new(vec![]));
+    let crypto_address = Arc::new(Mutex::new(vec![]));
     let mut _registry = vec![];
 
     // Create a default Indicator object
     let mut iocs = Indicators::default();
 
-    let s = s.split_whitespace().collect::<Vec<&str>>();
-    for x in s {
-        if network::is_ipv_any(x) || network::is_ip_cidr_any(x) {
-            ip_address.push(x.to_string())
-        } else if crypto::is_cryptocurrency_any(x) {
-            crypto_address.push(x.to_string())
-        } else if internet::is_domain(x) {
-            domains.push(x.to_string())
-        } else if internet::is_url(x) {
-            urls.push(x.to_string())
-        } else if internet::is_email(x, None) {
-            emails.push(x.to_string())
-        }
-    }
+    let all_strings = s.split_whitespace().collect::<Vec<&str>>();
+    all_strings
+        .into_par_iter()
+        .for_each(|line| {
+            if network::is_ipv_any(line) || network::is_ip_cidr_any(line) {
+                ip_address
+                    .lock()
+                    .expect("poisoned lock")
+                    .push(line.to_string());
+            } else if crypto::is_cryptocurrency_any(line) && crypto::which_cryptocurrency(line).is_some() {
+                crypto_address
+                    .lock()
+                    .expect("poisoned lock")
+                    .push(line.to_string());
+            } else if internet::is_domain(line) {
+                domains
+                    .lock()
+                    .expect("poisoned lock")
+                    .push(line.to_string());
+            } else if internet::is_url(line) {
+                urls.lock().expect("poisoned lock").push(line.to_string());
+            } else if internet::is_email(line, None) {
+                emails.lock().expect("poisoned lock").push(line.to_string());
+            }
+        });
+
+    let mut urls = urls.lock().expect("lock poisoned").to_vec();
+    let mut domains = domains.lock().expect("lock poisoned").to_vec();
+    let mut emails = emails.lock().expect("lock poisoned").to_vec();
+    let mut ip_address = ip_address.lock().expect("lock poisoned").to_vec();
+    let mut crypto_address = crypto_address.lock().expect("lock poisoned").to_vec();
 
     if urls.is_empty()
         && domains.is_empty()
