@@ -6,13 +6,12 @@ description = "Extract indicators like urls,domains,ip,emails,etc... from a give
 keywords = ["ioc", "indicators", "emails", "domains", "urls"]
 readme = "README.md"
 license-file = "LICENSE"
-exclude = ["assets", "examples"]
+exclude = ["data", "examples"]
 edition = "2021"
 
 [dependencies]
 idna = "0.2"
 lazy_static = "1"
-rayon = "1"
 regex = "1"
 serde = { version = "1", features = ["derive"] }
 
