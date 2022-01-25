@@ -4,7 +4,7 @@ extern crate lazy_static;
 pub(crate) mod validators;
 
 use serde::{Deserialize, Serialize};
-use std::{fs::read_to_string, io::Result, path::Path, sync::{Arc, Mutex}};
+use std::{fs::read_to_string, io::Result, path::Path};
 use validators::{crypto, internet, network};
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
