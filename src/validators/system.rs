@@ -25,5 +25,5 @@ pub fn is_registry_key(value: &str) -> bool {
     if value.is_empty() {
         return false;
     }
-    REGISTRY.is_match(&value)
+    REGISTRY.is_match(value)
 }

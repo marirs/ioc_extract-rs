@@ -1,5 +1,5 @@
 use ioc_extract::extract_from_file;
-use std::{process::exit, env};
+use std::{env, process::exit};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
