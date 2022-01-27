@@ -5,7 +5,7 @@ pub(crate) mod validators;
 
 use serde::{Deserialize, Serialize};
 use std::{fs::read_to_string, io::Result, path::Path};
-use validators::{crypto, internet, network};
+use validators::{crypto, internet, network, system};
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct Indicators {
@@ -46,11 +46,20 @@ pub fn extract(s: &str) -> Option<Indicators> {
     let mut emails = vec![];
     let mut ip_address = vec![];
     let mut crypto_address = vec![];
-    let mut _registry = vec![];
+    let mut registry = vec![];
 
     // Create a default Indicator object
     let mut iocs = Indicators::default();
 
+    // check for registry keys by breaking only newlines
+    let sr = s.split('\n').collect::<Vec<&str>>();
+    for x in sr {
+        if system::is_registry_key(x) {
+            registry.push(x.to_string())
+        }
+    }
+
+    // check for the rest by breaking newlines, whitespace, tabs, etc...
     let s = s.split_whitespace().collect::<Vec<&str>>();
     for x in s {
         if network::is_ipv_any(x) || network::is_ip_cidr_any(x) {
@@ -71,7 +80,7 @@ pub fn extract(s: &str) -> Option<Indicators> {
         && emails.is_empty()
         && ip_address.is_empty()
         && crypto_address.is_empty()
-        && _registry.is_empty()
+        && registry.is_empty()
     {
         return None;
     }
@@ -101,10 +110,10 @@ pub fn extract(s: &str) -> Option<Indicators> {
         crypto_address.dedup();
         iocs.crypto = Some(crypto_address);
     }
-    if !_registry.is_empty() {
-        _registry.sort();
-        _registry.dedup();
-        iocs.registry = Some(_registry);
+    if !registry.is_empty() {
+        registry.sort();
+        registry.dedup();
+        iocs.registry = Some(registry);
     }
 
     // return the result object
@@ -120,9 +129,7 @@ mod tests {
         let x = "there are ips in this test\n192.168.21.21 and ::ffff:127.0.0.1\nthe cidrs are:\n2001:0DB8:1234::/48 and \n10.0.0.0/33";
         let ioc = extract(x);
         assert!(ioc.is_some());
-        println!("{:?}", ioc);
         let ips = ioc.unwrap().ip_address;
-        println!("{:?}", ips);
         assert!(ips.is_some())
     }
 }
