@@ -11,7 +11,7 @@ lazy_static! {
         ].join("")
     ).unwrap();
     static ref DOMAIN_WHITELIST: Vec<&'static str> = vec!["localhost"];
-    static ref DOMAINS_EXT: Vec<String> = tld_download::download(false).unwrap_or_default();
+    static ref DOMAINS_EXT: Vec<String> = tld_download::from_db();
     static ref EMAIL: Regex = Regex::new(r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z0-9\-]*$").unwrap();
     static ref EMAIL_DOMAIN: Regex = Regex::new(
         &[
