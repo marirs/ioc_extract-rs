@@ -9,12 +9,18 @@ use validators::{crypto, internet, network, system};
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct Indicators {
+    /// All found URLs
     pub urls: Option<Vec<String>>,
+    /// All found Domains
     pub domains: Option<Vec<String>>,
+    /// All found Email Addresses
     pub emails: Option<Vec<String>>,
+    /// All found IP Addresses
     pub ip_address: Option<Vec<String>>,
+    /// All found Crypto Addresses
     pub crypto: Option<Vec<String>>,
-    pub registry: Option<Vec<String>>,
+    /// All found Registry Keys
+    pub registry_keys: Option<Vec<String>>,
 }
 
 pub fn extract_from_file<P: AsRef<Path>>(file: P) -> Result<Option<Indicators>> {
@@ -51,17 +57,17 @@ pub fn extract(s: &str) -> Option<Indicators> {
     // Create a default Indicator object
     let mut iocs = Indicators::default();
 
-    // check for registry keys by breaking only newlines
-    let sr = s.split('\n').collect::<Vec<&str>>();
-    for x in sr {
+    // check for registry keys & sql queries by breaking only newlines
+    // let sr = s.split('\n').collect::<Vec<&str>>();
+    for x in s.split('\n').collect::<Vec<&str>>() {
         if system::is_registry_key(x) {
             registry.push(x.to_string())
         }
     }
 
     // check for the rest by breaking newlines, whitespace, tabs, etc...
-    let s = s.split_whitespace().collect::<Vec<&str>>();
-    for x in s {
+    // let s = s.split_whitespace().collect::<Vec<&str>>();
+    for x in s.split_whitespace().collect::<Vec<&str>>() {
         if network::is_ipv_any(x) || network::is_ip_cidr_any(x) {
             ip_address.push(x.to_string())
         } else if crypto::is_cryptocurrency_any(x) {
@@ -113,7 +119,7 @@ pub fn extract(s: &str) -> Option<Indicators> {
     if !registry.is_empty() {
         registry.sort();
         registry.dedup();
-        iocs.registry = Some(registry);
+        iocs.registry_keys = Some(registry);
     }
 
     // return the result object
