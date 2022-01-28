@@ -14,7 +14,7 @@ idna = "0.2"
 lazy_static = "1"
 regex = "1"
 serde = { version = "1", features = ["derive"] }
-tld_download = "0.0.2"
+tld_download = { version = "0.1.1", features = ["with-db"] }
 
 [lib]
 name = "ioc_extract"
