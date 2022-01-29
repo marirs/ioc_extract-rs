@@ -1,4 +1,4 @@
-use regex::Regex;
+use fancy_regex::Regex;
 
 lazy_static! {
     /// Bitcoin Regex Pattern
@@ -82,8 +82,8 @@ fn validate(value: &str) -> bool {
     // have a min of 15 chars at-least before evaluating
     if value.chars().count() > 15 {
         for cryptocurrency in Type::all() {
-            if cryptocurrency.pattern().is_match(value) {
-                return true;
+            if cryptocurrency.pattern().is_match(value).unwrap_or_default() {
+                return true
             }
         }
     }
@@ -144,7 +144,7 @@ pub fn is_cryptocurrency_any(value: &str) -> bool {
 pub fn which_cryptocurrency(value: &str) -> Option<&str> {
     //! Output the Crypto Currency Name given the cryptocurrencty address.
     for cryptocurrency in Type::all() {
-        if cryptocurrency.pattern().is_match(value) {
+        if cryptocurrency.pattern().is_match(value).unwrap_or_default() {
             return Some(cryptocurrency.name());
         }
     }

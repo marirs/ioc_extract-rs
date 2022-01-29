@@ -1,17 +1,24 @@
 use std::{net::IpAddr, str::FromStr};
 
+/// Check to see if a given value corresponds to IPv4 Address.
 pub fn is_ipv4(value: &str) -> bool {
-    //! Check to see if a given value corresponds to IPv4 Address.
+    // 0., 1. & 2. ip subnets are reserved blocks of IANA & APNIC & RIPE NCC
+    // https://en.wikipedia.org/wiki/List_of_assigned_/8_IPv4_address_blocks
+    if value.starts_with("2.") ||
+        value.starts_with("1.") ||
+        value.starts_with("0.") {
+        return false
+    }
     let ip = if let Ok(ipaddr) = IpAddr::from_str(value) {
         ipaddr
     } else {
-        return false;
+        return false
     };
     ip.is_ipv4()
 }
 
+/// Check to see if a given IPv4 Address with CIDR is valid.
 pub fn is_ipv4_cidr(value: &str) -> bool {
-    //! Check to see if a given IPv4 Address with CIDR is valid.
     let splitted_groups: Vec<&str> = value.splitn(2, '/').collect();
     let prefix;
     let suffix;
@@ -19,7 +26,7 @@ pub fn is_ipv4_cidr(value: &str) -> bool {
         prefix = splitted_groups[0];
         suffix = splitted_groups[1];
     } else {
-        return false;
+        return false
     }
 
     let nsuffix: u32 = match suffix.parse() {
@@ -28,28 +35,28 @@ pub fn is_ipv4_cidr(value: &str) -> bool {
     };
 
     if nsuffix > 32 {
-        return false;
+        return false
     }
 
     if !is_ipv4(prefix) {
-        return false;
+        return false
     }
 
     true
 }
 
+/// Check to see if a given value corresponds to IPv6 Address.
 pub fn is_ipv6(value: &str) -> bool {
-    //! Check to see if a given value corresponds to IPv6 Address.
     let ip = if let Ok(ipaddr) = IpAddr::from_str(value) {
         ipaddr
     } else {
-        return false;
+        return false
     };
     ip.is_ipv6()
 }
 
+/// Check to see if a given IPv6 Address with CIDR is valid.
 pub fn is_ipv6_cidr(value: &str) -> bool {
-    //! Check to see if a given IPv6 Address with CIDR is valid.
     let splitted_groups: Vec<&str> = value.splitn(2, '/').collect();
     let prefix;
     let suffix;
@@ -57,7 +64,7 @@ pub fn is_ipv6_cidr(value: &str) -> bool {
         prefix = splitted_groups[0];
         suffix = splitted_groups[1];
     } else {
-        return false;
+        return false
     }
 
     let nsuffix: u32 = match suffix.parse() {
@@ -66,48 +73,48 @@ pub fn is_ipv6_cidr(value: &str) -> bool {
     };
 
     if nsuffix > 128 {
-        return false;
+        return false
     }
 
     if !is_ipv6(prefix) {
-        return false;
+        return false
     }
 
     true
 }
 
+/// Check to see if a given value corresponds to Local/loopback IP Address.
 pub fn is_ip_loopback(value: &str) -> bool {
-    //! Check to see if a given value corresponds to Local/loopback IP Address.
     let ip = if let Ok(ipaddr) = IpAddr::from_str(value) {
         ipaddr
     } else {
-        return false;
+        return false
     };
     ip.is_loopback()
 }
 
+/// Check to see if a given value corresponds to any IP Address.
 pub fn is_ipv_any(value: &str) -> bool {
-    //! Check to see if a given value corresponds to any IP Address.
     if is_ipv4(value) || is_ipv6(value) {
-        return true;
+        return true
     }
     false
 }
 
+/// Check to see if a given value corresponds to any IP CIDR.
 pub fn is_ip_cidr_any(value: &str) -> bool {
-    //! Check to see if a given value corresponds to any IP CIDR.
     if is_ipv4_cidr(value) || is_ipv6_cidr(value) {
-        return true;
+        return true
     }
     false
 }
 
+/// Check to see if a given value corresponds to IP Address & return its IP version.
 pub fn which_ipv(value: &str) -> Option<&str> {
-    //! Check to see if a given value corresponds to IP Address & return its IP version.
     if is_ipv4(value) {
-        return Some("IPv4");
+        return Some("IPv4")
     } else if is_ipv6(value) {
-        return Some("IPv6");
+        return Some("IPv6")
     }
     None
 }
@@ -118,13 +125,19 @@ mod tests {
 
     #[test]
     fn test_is_ipv4() {
+        // valid
         assert!(is_ipv4("10.10.10.1"));
         assert!(is_ipv4("100.128.10.132"));
+        assert!(is_ipv4("100.17.5.119"));
+        assert!(is_ipv4("127.0.0.1"));
+
+        // invalid
         assert!(!is_ipv4("12.110.105.256"));
         assert!(!is_ipv4("10.2.13"));
         assert!(!is_ipv4("256.10.10.1000"));
-        assert!(is_ipv4("100.17.5.119"));
-        assert!(is_ipv4("127.0.0.1"));
+        assert!(!is_ipv4("2.1.2.0"));
+        assert!(!is_ipv4("1.1.2.0"));
+        assert!(!is_ipv4("0.1.2.0"));
     }
 
     #[test]
