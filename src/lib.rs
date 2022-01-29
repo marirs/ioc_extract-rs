@@ -21,6 +21,8 @@ pub struct Indicators {
     pub crypto: Option<Vec<String>>,
     /// All found Registry Keys
     pub registry_keys: Option<Vec<String>>,
+    /// All found SQL Statements
+    pub sql: Option<Vec<String>>,
 }
 
 pub fn extract_from_file<P: AsRef<Path>>(file: P) -> Result<Option<Indicators>> {
@@ -53,6 +55,7 @@ pub fn extract(s: &str) -> Option<Indicators> {
     let mut ip_address = vec![];
     let mut crypto_address = vec![];
     let mut registry = vec![];
+    let mut sql = vec![];
 
     // Create a default Indicator object
     let mut iocs = Indicators::default();
@@ -62,6 +65,8 @@ pub fn extract(s: &str) -> Option<Indicators> {
     for x in s.split('\n').collect::<Vec<&str>>() {
         if system::is_registry_key(x) {
             registry.push(x.to_string())
+        } else if system::is_sql(x) {
+            sql.push(x.to_string())
         }
     }
 
@@ -87,6 +92,7 @@ pub fn extract(s: &str) -> Option<Indicators> {
         && ip_address.is_empty()
         && crypto_address.is_empty()
         && registry.is_empty()
+        && sql.is_empty()
     {
         return None;
     }
@@ -120,6 +126,11 @@ pub fn extract(s: &str) -> Option<Indicators> {
         registry.sort();
         registry.dedup();
         iocs.registry_keys = Some(registry);
+    }
+    if !sql.is_empty() {
+        sql.sort();
+        sql.dedup();
+        iocs.sql = Some(sql);
     }
 
     // return the result object
