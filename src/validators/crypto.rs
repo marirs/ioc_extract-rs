@@ -83,7 +83,7 @@ fn validate(value: &str) -> bool {
     if value.chars().count() > 15 {
         for cryptocurrency in Type::all() {
             if cryptocurrency.pattern().is_match(value).unwrap_or_default() {
-                return true
+                return true;
             }
         }
     }

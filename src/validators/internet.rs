@@ -1,5 +1,5 @@
-use idna::domain_to_ascii;
 use fancy_regex::Regex;
+use idna::domain_to_ascii;
 
 lazy_static! {
     static ref DOMAIN: Regex = Regex::new(
@@ -166,7 +166,8 @@ pub fn is_email(value: &str, whitelist: Option<Vec<&str>>) -> bool {
     };
     let value = format!("{}@{}", user_part, domain_part);
 
-    EMAIL.is_match(&value).unwrap_or_default() && EMAIL_DOMAIN.is_match(&domain_part).unwrap_or_default()
+    EMAIL.is_match(&value).unwrap_or_default()
+        && EMAIL_DOMAIN.is_match(&domain_part).unwrap_or_default()
         || whitelist.contains(&domain_part.as_str())
 }
 
@@ -177,7 +178,9 @@ pub fn is_domain(value: &str) -> bool {
         Err(_) => return false,
     };
 
-    if DOMAIN.is_match(&x).unwrap_or_default() && DOMAINS_EXT.iter().any(|suffix| x.ends_with(suffix)) {
+    if DOMAIN.is_match(&x).unwrap_or_default()
+        && DOMAINS_EXT.iter().any(|suffix| x.ends_with(suffix))
+    {
         return true;
     }
 
