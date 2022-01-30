@@ -46,6 +46,24 @@ lazy_static! {
         ]
         .join("")
     ).unwrap();
+    static ref REGEX: Regex = Regex::new(
+        &[
+            r"(?mxi)(.*?)",
+            r"(^",
+            r"(\^|\\A)",
+            r"|(\$|\\Z)$",
+            r"|\\([b<>csdwx0qenrtvf]|x(xx|hh)?)",
+            r"|\[:(upper|lower|alpha|alnum|digit|xdigit|punct|blank|space|ctnrl|graph|print|word)\]",
+            r"|\?([=!>#]|\<\=|\!,\=|\<\!|\(.*?\)\|\?)",
+            r"|\{(\d+|\d*\,\d*)\}\??",
+            r"|\(.+?\|.+?\)",
+            r"|\(\?\:.+?\)",
+            r"|\[\^.+?\]",
+            r"|\[\d+\-\d+\]",
+            r"|\(\?[xgmiesua]\)",
+            r").*",
+        ].join("")
+    ).unwrap();
 }
 
 pub fn is_registry_key(value: &str) -> bool {
@@ -63,6 +81,15 @@ pub fn is_sql(value: &str) -> bool {
     }
 
     SQL.is_match(value).unwrap_or_default()
+}
+
+pub fn is_regex(value: &str) -> bool {
+    //! Checks to see if a Given String is a Regular Expression
+    if value.is_empty() {
+        return false;
+    }
+
+    REGEX.is_match(value).unwrap_or_default()  && Regex::new(value).is_ok()
 }
 
 #[cfg(test)]
@@ -87,6 +114,7 @@ mod tests {
 
         // invalid
         assert!(!is_registry_key("This\nIs\\aRegistryKey"));
+        assert!(!is_registry_key("^[U][0-9]{12,15}$"));
     }
 
     #[test]
@@ -108,5 +136,16 @@ mod tests {
         assert!(!is_registry_key(
             "Select this is NOT a SQL Query WHERE it could get selected="
         ));
+    }
+
+    #[test]
+    fn test_is_regex() {
+        // valid
+        assert!(is_regex(r"^[U][0-9]{12,15}$"));
+        assert!(is_regex(r"a{12,15}$"));
+        assert!(is_regex(r"//[^\r\n]*[\r\n]"));
+        assert!(is_regex(r"[^i*&2@]"));
+        assert!(is_regex(r"^dog"));
+        assert!(is_regex(r"cat$"));
     }
 }

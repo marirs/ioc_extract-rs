@@ -24,6 +24,8 @@ pub struct Artifacts {
     pub registry_keys: Option<Vec<String>>,
     /// All found SQL Statements in the given string
     pub sql: Option<Vec<String>>,
+    /// All found Regular Expressions in the given string
+    pub regexes: Option<Vec<String>>,
 }
 
 pub fn from_file<P: AsRef<Path>>(file: P) -> Result<Option<Artifacts>> {
@@ -57,12 +59,12 @@ pub fn from_str(s: &str) -> Option<Artifacts> {
     let mut crypto_address = vec![];
     let mut registry = vec![];
     let mut sql = vec![];
+    let mut regexes = vec![];
 
     // Create a default Indicator object
     let mut iocs = Artifacts::default();
 
     // check for registry keys & sql queries by breaking only newlines
-    // let sr = s.split('\n').collect::<Vec<&str>>();
     for x in s.split('\n').collect::<Vec<&str>>() {
         if system::is_registry_key(x) {
             registry.push(x.to_string())
@@ -72,7 +74,6 @@ pub fn from_str(s: &str) -> Option<Artifacts> {
     }
 
     // check for the rest by breaking newlines, whitespace, tabs, etc...
-    // let s = s.split_whitespace().collect::<Vec<&str>>();
     for x in s.split_whitespace().collect::<Vec<&str>>() {
         if network::is_ipv_any(x) || network::is_ip_cidr_any(x) {
             ip_address.push(x.to_string())
@@ -84,6 +85,8 @@ pub fn from_str(s: &str) -> Option<Artifacts> {
             urls.push(x.to_string())
         } else if internet::is_email(x, None) {
             emails.push(x.to_string())
+        } else if system::is_regex(x) {
+            regexes.push(x.to_string())
         }
     }
 
@@ -94,6 +97,7 @@ pub fn from_str(s: &str) -> Option<Artifacts> {
         && crypto_address.is_empty()
         && registry.is_empty()
         && sql.is_empty()
+        && regexes.is_empty()
     {
         return None;
     }
@@ -132,6 +136,12 @@ pub fn from_str(s: &str) -> Option<Artifacts> {
         sql.sort();
         sql.dedup();
         iocs.sql = Some(sql);
+    }
+
+    if !regexes.is_empty() {
+        regexes.sort();
+        regexes.dedup();
+        iocs.regexes = Some(regexes);
     }
 
     // return the result object
