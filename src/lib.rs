@@ -7,25 +7,26 @@ use serde::{Deserialize, Serialize};
 use std::{fs::read_to_string, io::Result, path::Path};
 use validators::{crypto, internet, network, system};
 
+/// All different types of artifacts that which can be found in a given string
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
-pub struct Indicators {
-    /// All found URLs
+pub struct Artifacts {
+    /// All found URLs in the given string
     pub urls: Option<Vec<String>>,
-    /// All found Domains
+    /// All found Domains in the given string
     pub domains: Option<Vec<String>>,
-    /// All found Email Addresses
+    /// All found Email Addresses in the given string
     pub emails: Option<Vec<String>>,
-    /// All found IP Addresses
+    /// All found IP Addresses in the given string
     pub ip_address: Option<Vec<String>>,
-    /// All found Crypto Addresses
+    /// All found Crypto Addresses in the given string
     pub crypto: Option<Vec<String>>,
-    /// All found Registry Keys
+    /// All found Registry Keys in the given string
     pub registry_keys: Option<Vec<String>>,
-    /// All found SQL Statements
+    /// All found SQL Statements in the given string
     pub sql: Option<Vec<String>>,
 }
 
-pub fn from_file<P: AsRef<Path>>(file: P) -> Result<Option<Indicators>> {
+pub fn from_file<P: AsRef<Path>>(file: P) -> Result<Option<Artifacts>> {
     //! Extracts Indicators from a given file
     //!
     //! ## Example Usage
@@ -39,7 +40,7 @@ pub fn from_file<P: AsRef<Path>>(file: P) -> Result<Option<Indicators>> {
     Ok(from_str(&f))
 }
 
-pub fn from_str(s: &str) -> Option<Indicators> {
+pub fn from_str(s: &str) -> Option<Artifacts> {
     //! Extracts Indicators from a given string
     //!
     //! ## Example Usage
@@ -58,7 +59,7 @@ pub fn from_str(s: &str) -> Option<Indicators> {
     let mut sql = vec![];
 
     // Create a default Indicator object
-    let mut iocs = Indicators::default();
+    let mut iocs = Artifacts::default();
 
     // check for registry keys & sql queries by breaking only newlines
     // let sr = s.split('\n').collect::<Vec<&str>>();
