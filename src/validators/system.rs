@@ -3,18 +3,28 @@ use fancy_regex::Regex;
 lazy_static! {
     static ref REGISTRY: Regex =  Regex::new(
         &[
-            r"(?mi)",
+            r"(?mxi)",
+            r"(?!^.*?(?:",
+            r"\^.*$",
+            r"|\[\d\-\d\]",
+            r"|\{\d*\,\d*\}",
+            r"))",
             r"((^[^\n]*?)",
-            r"((^\\?|\\)(HK(EY|LM|CU|U|CC|CR))(\\|_[^\n]+?\\)|^(BCD[-\n]+|",
-            r"COMPONENTS|DRIVERS|ELAM|HARDWARE|SAM|Schema|SECURITY|SOFTWARE|SYSTEM|AppEvents|Console|Control Panel|Environment|EUDC|Keyboard Layout|Network|Printers|Uninstall|Volatile Environment)",
-            r"\\|(^\\?|\\)S\-\d+[^\n]*?\\|",
-            r"\[(Install Path|[Music Path]|Pictures Path|Videos Path|Artist|App Data Path|Name)\]|",
-            "\"AppliesTo\"|\"AssociateFiles\"|",
-            r"\[App Data Path\]|",
-            "\"Common\"|\"CommonEmojiTerminators\"|\"Complete\"|\"",
-            "(Configuration|DefaultFeature|Description|DiskPrompt|DocumentationShortcuts|EnvironmentPathNode|EnvironmentPathNpmModules|Extensions|External Program Arguments|File Location.*?|MainApplication|MainFeature|NodeRuntime|Path|Servicing_Key|Shortcuts)\"",
+            r"(",
+            r"(^\\?|\\)",
+            r"(HK(EY|LM|CU|U|CC|CR))",
+            r"(\\|_[^\n]+?\\)|^(BCD[-\n]+|",
+            r"COMPONENTS|DRIVERS|ELAM|HARDWARE|SAM|Schema|SECURITY|SOFTWARE|SYSTEM|AppEvents|Console|Control Panel|Environment|EUDC|Keyboard Layout|Network|Printers|Uninstall|Volatile Environment)\\",
+            r"|(^\\?|\\)S\-\d+[^\n]*?\\",
+            r"|\[(Install Path|[Music Path]|Pictures Path|Videos Path|Artist|App Data Path|Name)\]",
+            "|\"AppliesTo\"|\"AssociateFiles\"",
+            r"|\[App Data Path\]|",
+            "\"Common\"|\"CommonEmojiTerminators\"|\"Complete\"|",
+            "\"(Configuration|DefaultFeature|Description|DiskPrompt|DocumentationShortcuts|EnvironmentPathNode|EnvironmentPathNpmModules|Extensions|External Program Arguments|File Location.*?|MainApplication|MainFeature|NodeRuntime|Path|Servicing_Key|Shortcuts)\"",
             r")",
-            r"([^\n#]*?)\\?\S+)($|[^\\]+$)"
+            r"([^\n#]*?)",
+            r"\\?\S+)",
+            r"($|[^\\]+$)",
         ]
         .join("")
     ).unwrap();
@@ -23,16 +33,16 @@ lazy_static! {
             r"(?xmi)(",
             r"^[^\S\n]*",
             r"(",
-            r"INSERT\b((?!^[^\S\n]*$)[\s\S])+?\bVALUES\b.*",
-            r"|FROM\b((?!^[^\S\n]*$)[\s\S])+?\bWHERE\b.*",
-            r"|(SELECT|PATINDEX)\b((?!^[^\S\n]*$)[\s\S])+?\b(WHERE|FROM|AS)\b.*",
+            r"INSERT[^\S\n]+((?!^[^\S\n]*$)[\s\S])+?[^\S\n]+VALUES[^\S\n]+.*",
+            r"|FROM[^\S\n]+((?!^[^\S\n]*$)[\s\S])+?[^\S\n]+WHERE[^\S\n]+.*",
+            r"|(SELECT|PATINDEX)[^\S\n]+((?!^[^\S\n]*$)[\s\S])+?[^\S\n]+(WHERE|FROM|AS)[^\S\n]+.*",
             r"|BEGIN\b((?!^[^\S\n]*$)[\s\S])+?\bEND\b.*",
-            r"|(SELECT|UPDATE|DELETE|INSERT[ ]INTO|CREATE[ ]DATABASE|ALTER[ ]DATABASE|CREATE[ ]TABLE|ALTER[ ]TABLE|DROP[ ]TABLE|CREATE[ ]INDEX|DROP[ ]INDEX|DECLARE|SET|TRUNCATE|ADD|WHERE)\b",
+            r"|(SELECT|UPDATE|DELETE|INSERT[ ]INTO|CREATE[ ]DATABASE|ALTER[ ]DATABASE|CREATE[ ]TABLE|ALTER[ ]TABLE|DROP[ ]TABLE|CREATE[ ]INDEX|DROP[ ]INDEX|DECLARE|SET|TRUNCATE|ADD|WHERE)[^\S\n]+",
             r".*",
             r")",
             r"(\(?((?!^[^\S\n]*$)[\s\S])+?\)[^)\n]*)?",
             r"(\n|$)",
-            r")+"
+            r")+",
         ]
         .join("")
     ).unwrap();
@@ -62,10 +72,18 @@ mod tests {
     #[test]
     fn test_is_registry_key() {
         // invalid
-        assert!(is_registry_key("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"));
-        assert!(is_registry_key("SOFTWARE\\Microsoft\\Windows\\CurrentVersion"));
-        assert!(is_registry_key("HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion"));
-        assert!(is_registry_key("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion"));
+        assert!(is_registry_key(
+            "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"
+        ));
+        assert!(is_registry_key(
+            "SOFTWARE\\Microsoft\\Windows\\CurrentVersion"
+        ));
+        assert!(is_registry_key(
+            "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion"
+        ));
+        assert!(is_registry_key(
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion"
+        ));
 
         // invalid
         assert!(!is_registry_key("This\nIs\\aRegistryKey"));
@@ -76,13 +94,19 @@ mod tests {
         // invalid
         assert!(is_sql("SELECT * FROM xyz"));
         assert!(is_sql("SELECT * FROM xyz WHERE x LIKE '%y%';"));
-        assert!(is_sql("INSERT INTO Country(CountryID,CountryName) VALUES (1,'United States')"));
-        assert!(is_sql(r#"CREATE TABLE table_name (
+        assert!(is_sql(
+            "INSERT INTO Country(CountryID,CountryName) VALUES (1,'United States')"
+        ));
+        assert!(is_sql(
+            r#"CREATE TABLE table_name (
         column1 INTEGER,
         column2 VARCHAR2,
-        column3 INTEGE);"#));
+        column3 INTEGE);"#
+        ));
 
         // invalid
-        assert!(!is_registry_key("Select this is NOT a SQL Query WHERE it could get selected="));
+        assert!(!is_registry_key(
+            "Select this is NOT a SQL Query WHERE it could get selected="
+        ));
     }
 }
