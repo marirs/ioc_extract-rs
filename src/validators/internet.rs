@@ -29,7 +29,7 @@ lazy_static! {
     static ref IP_LAST_OCTET: &'static str = r"(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))";
     static ref URL: Regex = Regex::new(
         &[
-            r"(?i)^",
+            r"(?i)",
             // protocol identifier
             r"(?:(?:https?|ftp)://)",
             // user:pass authentication
