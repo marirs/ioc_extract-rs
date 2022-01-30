@@ -1,4 +1,4 @@
-use ioc_extract::extract_from_file;
+use ioc_extract::from_file;
 use std::{env, process::exit};
 
 fn main() {
@@ -9,6 +9,6 @@ fn main() {
     }
     let file = args[1].to_owned();
 
-    let ioc = extract_from_file(&file);
+    let ioc = from_file(&file);
     println!("IOC's:\n{:#?}", ioc);
 }

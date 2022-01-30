@@ -25,26 +25,26 @@ pub struct Indicators {
     pub sql: Option<Vec<String>>,
 }
 
-pub fn extract_from_file<P: AsRef<Path>>(file: P) -> Result<Option<Indicators>> {
+pub fn from_file<P: AsRef<Path>>(file: P) -> Result<Option<Indicators>> {
     //! Extracts Indicators from a given file
     //!
     //! ## Example Usage
     //! ```rust
-    //! use ioc_extract::extract_from_file;
+    //! use ioc_extract::from_file;
     //!
     //! let f = "data/sample.txt";
-    //! println!("{:?}", extract_from_file(f));
+    //! println!("{:?}", from_file(f));
     //! ```
     let f = read_to_string(file)?;
-    Ok(extract(&f))
+    Ok(from_str(&f))
 }
 
-pub fn extract(s: &str) -> Option<Indicators> {
+pub fn from_str(s: &str) -> Option<Indicators> {
     //! Extracts Indicators from a given string
     //!
     //! ## Example Usage
     //! ```rust
-    //! use ioc_extract::extract;
+    //! use ioc_extract::from_str;
     //!
     //! let x = "this is an IP address: 192.168.2.11";
     //! println!("{:?}", x);
@@ -144,7 +144,7 @@ mod tests {
     #[test]
     fn test_extract_ip() {
         let x = "there are ips in this test\n192.168.21.21 and ::ffff:127.0.0.1\nthe cidrs are:\n2001:0DB8:1234::/48 and \n10.0.0.0/33";
-        let ioc = extract(x);
+        let ioc = from_str(x);
         assert!(ioc.is_some());
         let ips = ioc.unwrap().ip_address;
         assert!(ips.is_some())
