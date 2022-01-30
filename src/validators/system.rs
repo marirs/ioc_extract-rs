@@ -89,7 +89,7 @@ pub fn is_regex(value: &str) -> bool {
         return false;
     }
 
-    REGEX.is_match(value).unwrap_or_default()  && Regex::new(value).is_ok()
+    REGEX.is_match(value).unwrap_or_default() && Regex::new(value).is_ok()
 }
 
 #[cfg(test)]
