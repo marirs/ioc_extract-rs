@@ -18,7 +18,7 @@ lazy_static! {
     /// Neo Regex Pattern
     static ref NEO: Regex = Regex::new(r"(?i)^A[0-9a-zA-Z]{33}$").unwrap();
     /// Ripple Regex Pattern
-    static ref XRP: Regex = Regex::new(r"(?i)^r|X[0-9a-zA-Z]{33,47}$").unwrap();
+    static ref XRP: Regex = Regex::new(r"(?si)(?=^.*?r|X)[0-9a-zA-Z]{33,47}$").unwrap();
 }
 
 enum Type {
@@ -82,8 +82,8 @@ fn validate(value: &str) -> bool {
     // have a min of 15 chars at-least before evaluating
     if value.chars().count() > 15 {
         for cryptocurrency in Type::all() {
-            if cryptocurrency.pattern().is_match(value).unwrap_or_default() {
-                return true;
+            if cryptocurrency.pattern().is_match(value).unwrap() {
+                return true
             }
         }
     }
@@ -253,6 +253,7 @@ mod tests {
 
     #[test]
     fn test_is_ripple() {
-        assert!(is_ripple("rUocf1ixKzTuEe34kmVhRvGqNCofY1NJzV"))
+        assert!(is_ripple("rUocf1ixKzTuEe34kmVhRvGqNCofY1NJzV"));
+        assert!(!is_ripple("RegQueryValueExA"));
     }
 }
