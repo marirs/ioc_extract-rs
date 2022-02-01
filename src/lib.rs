@@ -71,6 +71,7 @@ impl Artifacts {
 
         // check for registry keys & sql queries by breaking only newlines
         for x in s.split('\n').collect::<Vec<&str>>() {
+            let x = x.trim();
             if system::is_registry_key(x) {
                 registry.push(x.to_string())
             } else if system::is_sql(x) {
@@ -82,6 +83,7 @@ impl Artifacts {
 
         // check for the rest by breaking newlines, whitespace, tabs, etc...
         for x in s.split_whitespace().collect::<Vec<&str>>() {
+            let x = x.trim();
             if network::is_ipv_any(x) || network::is_ip_cidr_any(x) {
                 ip_address.push(x.to_string())
             } else if crypto::is_cryptocurrency_any(x) {
