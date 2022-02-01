@@ -6,7 +6,6 @@ pub(crate) mod validators;
 use serde::{Deserialize, Serialize};
 use std::{fs::read_to_string, io::Result, path::Path};
 use validators::{crypto, internet, network, system};
-use crate::validators::crypto::which_cryptocurrency;
 
 /// All different types of artifacts that which can be found in a given string
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
