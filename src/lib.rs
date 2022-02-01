@@ -85,7 +85,6 @@ impl Artifacts {
             if network::is_ipv_any(x) || network::is_ip_cidr_any(x) {
                 ip_address.push(x.to_string())
             } else if crypto::is_cryptocurrency_any(x) {
-                println!("{:?}", which_cryptocurrency(x));
                 crypto_address.push(x.to_string())
             } else if internet::is_domain(x) {
                 domains.push(x.to_string())
