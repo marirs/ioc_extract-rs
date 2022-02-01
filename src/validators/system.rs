@@ -58,6 +58,25 @@ lazy_static! {
             r").*",
         ].join("")
     ).unwrap();
+    static ref FILE_PATH: Regex = Regex::new(
+        &[
+            r"(?ix)^",
+            r"(?:",
+            r"[a-z]:[\\\/]",
+            r"|[\\\/]+|\.{1,2}[\\\/]+",
+            r")",
+            r"(?:[^\\\/\n<>:",
+            "\"",
+            r"\|\?\*]*[\\\/])*",
+            r"[^\\\/\.\n<>:",
+            "\"",
+            r"\|\?\*]*?",
+            r"[^\\\/\.\s<>:",
+            "\"",
+            r"\|\?\*]",
+            r"\.\w{3,4}$"
+        ].join("")
+    ).unwrap();
 }
 
 pub fn is_registry_key(value: &str) -> bool {
@@ -84,6 +103,14 @@ pub fn is_regex(value: &str) -> bool {
     }
 
     REGEX.is_match(value).unwrap_or_default() && Regex::new(value).is_ok()
+}
+
+pub fn is_file_path(value: &str) -> bool {
+    //! Checks to see if a Given String is a File Path
+    if value.is_empty() {
+        return false;
+    }
+    FILE_PATH.is_match(value).unwrap_or_default()
 }
 
 #[cfg(test)]
@@ -141,5 +168,20 @@ mod tests {
         assert!(is_regex(r"[^i*&2@]"));
         assert!(is_regex(r"^dog"));
         assert!(is_regex(r"cat$"));
+    }
+
+    #[test]
+    fn test_is_file_path() {
+        // valid
+        assert!(is_file_path("/home/user/Documents/foo.rar"));
+        assert!(is_file_path("../test.exe"));
+        assert!(is_file_path("\\\\Server2\\Share\\Test\\Foo.exe"));
+        assert!(is_file_path("C:\\Program Files\\foo\\bar.exe"));
+        assert!(is_file_path("c:\\Personal\\MyFolder\\MyFile.exe"));
+        assert!(is_file_path("..\\..\\folder\\file.exe"));
+        assert!(is_file_path("z:\\folder\\file.jpeg"));
+
+        // invalid
+        assert!(!is_file_path("HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion"))
     }
 }

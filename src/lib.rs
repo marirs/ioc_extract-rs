@@ -6,6 +6,7 @@ pub(crate) mod validators;
 use serde::{Deserialize, Serialize};
 use std::{fs::read_to_string, io::Result, path::Path};
 use validators::{crypto, internet, network, system};
+use crate::validators::crypto::which_cryptocurrency;
 
 /// All different types of artifacts that which can be found in a given string
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
@@ -26,6 +27,8 @@ pub struct Artifacts {
     pub sql: Option<Vec<String>>,
     /// All found Regular Expressions in the given string
     pub regexes: Option<Vec<String>>,
+    /// All found File Paths in the given string
+    pub file_paths: Option<Vec<String>>,
 }
 
 impl Artifacts {
@@ -61,6 +64,7 @@ impl Artifacts {
         let mut registry = vec![];
         let mut sql = vec![];
         let mut regexes = vec![];
+        let mut file_paths = vec![];
 
         // Create a default Indicator object
         let mut iocs = Artifacts::default();
@@ -71,6 +75,8 @@ impl Artifacts {
                 registry.push(x.to_string())
             } else if system::is_sql(x) {
                 sql.push(x.to_string())
+            } else if system::is_file_path(x) {
+                file_paths.push(x.to_string())
             }
         }
 
@@ -79,6 +85,7 @@ impl Artifacts {
             if network::is_ipv_any(x) || network::is_ip_cidr_any(x) {
                 ip_address.push(x.to_string())
             } else if crypto::is_cryptocurrency_any(x) {
+                println!("{:?}", which_cryptocurrency(x));
                 crypto_address.push(x.to_string())
             } else if internet::is_domain(x) {
                 domains.push(x.to_string())
@@ -99,6 +106,7 @@ impl Artifacts {
             && registry.is_empty()
             && sql.is_empty()
             && regexes.is_empty()
+            && file_paths.is_empty()
         {
             return None;
         }
@@ -138,11 +146,15 @@ impl Artifacts {
             sql.dedup();
             iocs.sql = Some(sql);
         }
-
         if !regexes.is_empty() {
             regexes.sort();
             regexes.dedup();
             iocs.regexes = Some(regexes);
+        }
+        if !file_paths.is_empty() {
+            file_paths.sort();
+            file_paths.dedup();
+            iocs.file_paths = Some(file_paths);
         }
 
         // return the result object
