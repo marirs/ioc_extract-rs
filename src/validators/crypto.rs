@@ -2,23 +2,32 @@ use fancy_regex::Regex;
 
 lazy_static! {
     /// Bitcoin Regex Pattern
-    static ref BTC: Regex = Regex::new(r"(?i)^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$").unwrap();
+    static ref BTC: Regex = Regex::new(r"(?i)^[13][a-km-zA-HJ-NP-Z1-9]{26,33}|bc1[a-z0-9]{39,59}\b").unwrap();
     /// Bitcoin Cash Regex Pattern
-    static ref BCH: Regex = Regex::new(r"(?i)^((bitcoincash|bchreg|bchtest):)?(q|p)[a-z0-9]{41}$").unwrap();
+    static ref BCH: Regex = Regex::new(r"(?i)^(((bitcoincash|bchreg|bchtest):)?(?:q|p)[a-z0-9]{41}|[13][a-km-zA-HJ-NP-Z1-9]{33})\b").unwrap();
     /// Ethereum Regex Pattern
-    static ref ETH: Regex = Regex::new(r"(?i)^0x[a-fA-F0-9]{40}$").unwrap();
+    static ref ETH: Regex = Regex::new(r"(?i)^0x[a-fA-F0-9]{40}\b").unwrap();
     /// Litecoin Regex Pattern
-    static ref LTC: Regex = Regex::new(r"(?i)^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$").unwrap();
+    static ref LTC: Regex = Regex::new(r"(?i)^(?:ltc1|[LM])(?=\S*?\d\S*?\b)[a-km-zA-HJ-NP-Z1-9]{26,33}\b").unwrap();
     /// Dodge Coin Regex Pattern
-    static ref DODGE: Regex = Regex::new(r"(?i)^D{1}[5-9A-HJ-NP-U]{1}[1-9A-HJ-NP-Za-km-z]{32}$").unwrap();
+    static ref DODGE: Regex = Regex::new(r"(?i)^D[5-9A-HJ-NP-U][1-9a-km-zA-HJ-NP-Z]{32}\b").unwrap();
     /// Dash Regex Pattern
-    static ref DASH: Regex = Regex::new(r"^(?i)X[1-9A-HJ-NP-Za-km-z]{33}$").unwrap();
+    static ref DASH: Regex = Regex::new(r"(?i)^X[1-9A-HJ-NP-Za-km-z]{33}\b").unwrap();
     /// Monero Regex Pattern
-    static ref XMR: Regex = Regex::new(r"(?i)^4[0-9AB][1-9A-HJ-NP-Za-km-z]{93}$").unwrap();
+    static ref XMR: Regex = Regex::new(r"(?i)^[48][0-9AB][1-9A-HJ-NP-Za-km-z]{93}\b").unwrap();
     /// Neo Regex Pattern
-    static ref NEO: Regex = Regex::new(r"(?i)^A[0-9a-zA-Z]{33}$").unwrap();
+    static ref NEO: Regex = Regex::new(r"(?i)^A[0-9a-zA-Z]{33}\b").unwrap();
     /// Ripple Regex Pattern
-    static ref XRP: Regex = Regex::new(r"(?si)(?=^.*?r|X)[0-9a-zA-Z]{33,47}$").unwrap();
+    static ref XRP: Regex = Regex::new(r"(?i)^[rx](?=\S*?\d\S*?\b)[0-9a-zA-Z]{33,47}\b").unwrap();
+
+    /// Incase of Illegal chars for a Crypto Wallet
+    static ref ILLEGAL_CHARS: Vec<String> = vec![
+        '.', '!', '%', '*', '$', '#', '@', ')', '(', '^', '`', '~', '|',
+        '>', '<', '-', '_', '"', '\\', '}', '{', ':', ';', ',', '/', '?',
+    ]
+        .iter()
+        .map(|c|c.to_string())
+        .collect();
 }
 
 enum Type {
@@ -80,10 +89,14 @@ impl Type {
 /// Evaluate CryptoCurrency & Validate
 fn validate(value: &str) -> bool {
     // have a min of 15 chars at-least before evaluating
-    if value.chars().count() > 15 {
+    if value.chars().count() > 15
+        && value.chars().any(|c| c.is_ascii_digit())
+        && !value.is_empty()
+        && !ILLEGAL_CHARS.iter().any(|c| value.contains(c))
+    {
         for cryptocurrency in Type::all() {
             if cryptocurrency.pattern().is_match(value).unwrap() {
-                return true
+                return true;
             }
         }
     }
@@ -132,7 +145,6 @@ pub fn is_neo(value: &str) -> bool {
 
 pub fn is_ripple(value: &str) -> bool {
     //! Check if the given crypto address is Ripple.
-
     validate(value)
 }
 

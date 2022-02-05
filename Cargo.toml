@@ -1,6 +1,6 @@
 [package]
 name = "ioc_extract"
-version = "0.4.1"
+version = "0.4.2"
 description = "Extract indicators like urls,domains,ip,emails,etc... from a given string"
 authors = ["Marirs <marirs@gmail.com>"]
 homepage = "https://github.com/marirs/ioc_extract-rs"

@@ -14,3 +14,9 @@ Some of the following regexs to be checked:
 ^A[a-zA-Z0-9]{25,50}$ ^B[a-zA-Z0-9]{32,36}$
 ^([095]|[099]|[066]|[068]|[094]|[050]|[039]|[067]|[096]|[098]|[097]|[063]|[073]|[091]|[092]|[094])(\d{3}\)|\d{3})\d{6}$
 ^[Z][0-9]{12,15}$
+
+dElectronicsEngineersIncIEEERootCA.crl0
+dElectronicsEngineersIncIEEERootCA
+D6K2nqqQKycTucCSFSHhpiig4yQ6NPQRf9
+DBs4WcRE7eysKwRxHNX88XZVCQ9M6QSUS
+

@@ -3,6 +3,7 @@ extern crate lazy_static;
 
 pub(crate) mod validators;
 
+use crate::validators::crypto::which_cryptocurrency;
 use serde::{Deserialize, Serialize};
 use std::{fs::read_to_string, io::Result, path::Path};
 use validators::{crypto, internet, network, system};
@@ -86,7 +87,7 @@ impl Artifacts {
             if network::is_ipv_any(x) || network::is_ip_cidr_any(x) {
                 ip_address.push(x.to_string())
             } else if crypto::is_cryptocurrency_any(x) {
-                crypto_address.push(x.to_string())
+                crypto_address.push(format!("{} - {}", x, which_cryptocurrency(x).unwrap()))
             } else if internet::is_domain(x) {
                 domains.push(x.to_string())
             } else if internet::is_url(x) {
