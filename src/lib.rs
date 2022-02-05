@@ -1,12 +1,11 @@
 #[macro_use]
 extern crate lazy_static;
 
-pub(crate) mod validators;
+mod validators;
+mod worker;
 
-use crate::validators::crypto::which_cryptocurrency;
 use serde::{Deserialize, Serialize};
-use std::{fs::read_to_string, io::Result, path::Path};
-use validators::{crypto, internet, network, system};
+use std::{fs::read_to_string, io::Result, path::Path, thread::spawn};
 
 /// All different types of artifacts that which can be found in a given string
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
@@ -56,110 +55,40 @@ impl Artifacts {
         //! let x = "this is an IP address: 192.168.2.11";
         //! println!("{:?}", Artifacts::from_str(x));
         //! ```
-        let mut urls = vec![];
-        let mut domains = vec![];
-        let mut emails = vec![];
-        let mut ip_address = vec![];
-        let mut crypto_address = vec![];
-        let mut registry = vec![];
-        let mut sql = vec![];
-        let mut regexes = vec![];
-        let mut file_paths = vec![];
+        let s1 = s.to_string();
+        let s2 = s.to_string();
 
-        // Create a default Indicator object
-        let mut iocs = Artifacts::default();
+        let thread_handle1 = spawn(move || worker::by_newline(s1));
+        let thread_handle2 = spawn(move || worker::by_whitespace(s2));
 
-        // check for registry keys & sql queries by breaking only newlines
-        for x in s.split('\n').collect::<Vec<&str>>() {
-            let x = x.trim();
-            if system::is_registry_key(x) {
-                registry.push(x.to_string())
-            } else if system::is_sql(x) {
-                sql.push(x.to_string())
-            } else if system::is_file_path(x) {
-                file_paths.push(x.to_string())
-            }
-        }
+        let newline_res = thread_handle1.join().unwrap();
+        let whitespace_res = thread_handle2.join().unwrap();
 
-        // check for the rest by breaking newlines, whitespace, tabs, etc...
-        for x in s.split_whitespace().collect::<Vec<&str>>() {
-            let x = x.trim();
-            if network::is_ipv_any(x) || network::is_ip_cidr_any(x) {
-                ip_address.push(x.to_string())
-            } else if crypto::is_cryptocurrency_any(x) {
-                crypto_address.push(format!("{} - {}", x, which_cryptocurrency(x).unwrap()))
-            } else if internet::is_domain(x) {
-                domains.push(x.to_string())
-            } else if internet::is_url(x) {
-                urls.push(x.to_string())
-            } else if internet::is_email(x, None) {
-                emails.push(x.to_string())
-            } else if system::is_regex(x) {
-                regexes.push(x.to_string())
-            }
-        }
-
-        if urls.is_empty()
-            && domains.is_empty()
-            && emails.is_empty()
-            && ip_address.is_empty()
-            && crypto_address.is_empty()
-            && registry.is_empty()
-            && sql.is_empty()
-            && regexes.is_empty()
-            && file_paths.is_empty()
+        if newline_res.file_paths.is_none()
+            && newline_res.registry_keys.is_none()
+            && newline_res.sql.is_none()
+            && whitespace_res.regexes.is_none()
+            && whitespace_res.crypto.is_none()
+            && whitespace_res.emails.is_none()
+            && whitespace_res.domains.is_none()
+            && whitespace_res.ip_address.is_none()
+            && whitespace_res.urls.is_none()
         {
             return None;
         }
 
-        if !urls.is_empty() {
-            urls.sort();
-            urls.dedup();
-            iocs.urls = Some(urls);
-        }
-        if !domains.is_empty() {
-            domains.sort();
-            domains.dedup();
-            iocs.domains = Some(domains);
-        }
-        if !emails.is_empty() {
-            emails.sort();
-            emails.dedup();
-            iocs.emails = Some(emails);
-        }
-        if !ip_address.is_empty() {
-            ip_address.sort();
-            ip_address.dedup();
-            iocs.ip_address = Some(ip_address);
-        }
-        if !crypto_address.is_empty() {
-            crypto_address.sort();
-            crypto_address.dedup();
-            iocs.crypto = Some(crypto_address);
-        }
-        if !registry.is_empty() {
-            registry.sort();
-            registry.dedup();
-            iocs.registry_keys = Some(registry);
-        }
-        if !sql.is_empty() {
-            sql.sort();
-            sql.dedup();
-            iocs.sql = Some(sql);
-        }
-        if !regexes.is_empty() {
-            regexes.sort();
-            regexes.dedup();
-            iocs.regexes = Some(regexes);
-        }
-        if !file_paths.is_empty() {
-            file_paths.sort();
-            file_paths.dedup();
-            iocs.file_paths = Some(file_paths);
-        }
-
         // return the result object
-        Some(iocs)
+        Some(Artifacts {
+            urls: whitespace_res.urls,
+            domains: whitespace_res.domains,
+            emails: whitespace_res.emails,
+            ip_address: whitespace_res.ip_address,
+            crypto: whitespace_res.crypto,
+            registry_keys: newline_res.registry_keys,
+            sql: newline_res.sql,
+            regexes: whitespace_res.regexes,
+            file_paths: newline_res.file_paths,
+        })
     }
 }
 
