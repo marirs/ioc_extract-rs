@@ -42,20 +42,7 @@ lazy_static! {
     ).unwrap();
     static ref REGEX: Regex = Regex::new(
         &[
-            r"(?mxi)(.*?)",
-            r"(^",
-            r"(\^|\\A)",
-            r"|(\$|\\Z)$",
-            r"|\\([b<>csdwx0qenrtvf]|x(xx|hh)?)",
-            r"|\[:(upper|lower|alpha|alnum|digit|xdigit|punct|blank|space|ctnrl|graph|print|word)\]",
-            r"|\?([=!>#]|\<\=|\!,\=|\<\!|\(.*?\)\|\?)",
-            r"|\{(\d+|\d*\,\d*)\}\??",
-            r"|\(.+?\|.+?\)",
-            r"|\(\?\:.+?\)",
-            r"|\[\^.+?\]",
-            r"|\[\d+\-\d+\]",
-            r"|\(\?[xgmiesua]\)",
-            r").*",
+            r"^.*?(\[\^.*?\]|\[[^\[]+?\-[^\[]+?\]|^\^|\{\d*,?\d*\}|\$$|[\(\)\]]\?).*"
         ].join("")
     ).unwrap();
     static ref FILE_PATH: Regex = Regex::new(
@@ -81,7 +68,7 @@ lazy_static! {
 
 pub fn is_registry_key(value: &str) -> bool {
     //! Checks to see if a Given String is a registry key
-    if value.is_empty() {
+    if value.is_empty() || !value.contains('\\') {
         return false;
     }
     REGISTRY.is_match(value).unwrap_or_default()
@@ -110,6 +97,7 @@ pub fn is_file_path(value: &str) -> bool {
     if value.is_empty() {
         return false;
     }
+
     FILE_PATH.is_match(value).unwrap_or_default()
 }
 
@@ -182,6 +170,8 @@ mod tests {
         assert!(is_file_path("z:\\folder\\file.jpeg"));
 
         // invalid
-        assert!(!is_file_path("HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion"))
+        assert!(!is_file_path(
+            "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion"
+        ))
     }
 }
