@@ -1,6 +1,6 @@
 [package]
 name = "ioc_extract"
-version = "0.4.2"
+version = "0.4.3"
 description = "Extract indicators like urls,domains,ip,emails,etc... from a given string"
 authors = ["Marirs <marirs@gmail.com>"]
 homepage = "https://github.com/marirs/ioc_extract-rs"
@@ -16,7 +16,7 @@ fancy-regex = "0.7"
 idna = "0.2"
 lazy_static = "1"
 serde = { version = "1", features = ["derive"] }
-tld_download = { version = "0.1.1", features = ["with-db"] }
+tld_download = { version = "0.1.2", features = ["with-db"] }
 
 [lib]
 name = "ioc_extract"

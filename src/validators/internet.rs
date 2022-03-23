@@ -205,7 +205,6 @@ mod tests {
         assert!(is_tld_valid("清华大学.cn"));
 
         // Invalid
-        assert!(!is_tld_valid("example.c1om"));
         assert!(!is_tld_valid("example.co9.uk"));
         assert!(!is_tld_valid("example.i1o"));
         assert!(!is_tld_valid("清华大学.cn9"));
@@ -245,6 +244,7 @@ mod tests {
         assert!(is_domain("अशोका.भारत"));
 
         // Invalid
+        assert!(!is_domain("example.c1om"));
         assert!(!is_domain("@example.com"));
         assert!(!is_domain("http://www.транспорт.com"));
         assert!(!is_domain("https://www.example.com"));
