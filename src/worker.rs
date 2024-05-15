@@ -80,8 +80,8 @@ pub fn by_whitespace(s: String) -> WhitespaceResult {
             crypto_address.push(format!("{} - {}", x, which_cryptocurrency(x).unwrap()))
         } else if internet::is_domain(x) {
             domains.push(x.to_string())
-        } else if internet::is_url(x) {
-            urls.push(x.to_string())
+        } else if let Some(url) = internet::get_url(x) {
+            urls.push(url)
         } else if internet::is_email(x, None) {
             emails.push(x.to_string())
         } else if system::is_regex(x) {
