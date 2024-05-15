@@ -21,7 +21,7 @@ lazy_static! {
     static ref XRP: Regex = Regex::new(r"(?i)^[rx](?=\S*?\d\S*?\b)[0-9a-zA-Z]{33,47}\b").unwrap();
 
     /// Incase of Illegal chars for a Crypto Wallet
-    static ref ILLEGAL_CHARS: Vec<String> = vec![
+    static ref ILLEGAL_CHARS: Vec<String> = [
         '.', '!', '%', '*', '$', '#', '@', ')', '(', '^', '`', '~', '|',
         '>', '<', '-', '_', '"', '\\', '}', '{', ':', ';', ',', '/', '?',
     ]
