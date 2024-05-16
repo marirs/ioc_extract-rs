@@ -192,6 +192,14 @@ pub fn is_url(value: &str) -> bool {
     URL.is_match(value).unwrap_or_default()
 }
 
+pub fn get_url(value: &str) -> Option<String> {
+    //! Extracts the URL from a given string.
+    let val = URL
+        .find(value)
+        .expect("Regex failed to operate on input!")?;
+    Some(val.as_str().to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -267,5 +275,37 @@ mod tests {
         assert!(!is_url("abc.com"));
         assert!(!is_url("localhost"));
         assert!(!is_url("localhost:9455"));
+    }
+
+    #[test]
+    fn test_get_url() {
+        assert_eq!(
+            get_url("https://www.example.com").unwrap(),
+            "https://www.example.com"
+        );
+        assert_eq!(
+            get_url("https://example.com").unwrap(),
+            "https://example.com"
+        );
+        assert_eq!(
+            get_url("https://example.co.uk").unwrap(),
+            "https://example.co.uk"
+        );
+        assert_eq!(
+            get_url("http://www.example.co.uk").unwrap(),
+            "http://www.example.co.uk"
+        );
+        assert_eq!(
+            get_url("https://localhost:8443").unwrap(),
+            "https://localhost:8443"
+        );
+        assert_eq!(get_url("http://localhost").unwrap(), "http://localhost");
+        assert_eq!(get_url("http://清华大学.cn").unwrap(), "http://清华大学.cn");
+
+        assert_eq!(
+            get_url("foo:https://example.com").unwrap(),
+            "https://example.com"
+        );
+        assert_eq!(get_url("abc.com"), None);
     }
 }
