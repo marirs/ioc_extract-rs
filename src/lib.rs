@@ -5,7 +5,13 @@ mod validators;
 mod worker;
 
 use serde::{Deserialize, Serialize};
-use std::{fs::read_to_string, io::Result, path::Path, thread::spawn};
+use std::{
+    fs::read_to_string,
+    io::Result,
+    ops::{Add, AddAssign},
+    path::Path,
+    thread::spawn,
+};
 
 /// All different types of artifacts that which can be found in a given string
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
@@ -89,6 +95,54 @@ impl Artifacts {
             regexes: whitespace_res.regexes,
             file_paths: newline_res.file_paths,
         })
+    }
+
+    fn combine_options(
+        opt1: Option<Vec<String>>,
+        opt2: Option<Vec<String>>,
+    ) -> Option<Vec<String>> {
+        match (opt1, opt2) {
+            (Some(mut vec1), Some(vec2)) => {
+                vec1.extend(vec2);
+                Some(vec1)
+            }
+            (Some(vec1), None) => Some(vec1),
+            (None, Some(vec2)) => Some(vec2),
+            (None, None) => None,
+        }
+    }
+}
+
+impl Add for Artifacts {
+    type Output = Artifacts;
+
+    fn add(self, other: Artifacts) -> Artifacts {
+        Artifacts {
+            urls: Artifacts::combine_options(self.urls, other.urls),
+            domains: Artifacts::combine_options(self.domains, other.domains),
+            emails: Artifacts::combine_options(self.emails, other.emails),
+            ip_address: Artifacts::combine_options(self.ip_address, other.ip_address),
+            crypto: Artifacts::combine_options(self.crypto, other.crypto),
+            registry_keys: Artifacts::combine_options(self.registry_keys, other.registry_keys),
+            sql: Artifacts::combine_options(self.sql, other.sql),
+            regexes: Artifacts::combine_options(self.regexes, other.regexes),
+            file_paths: Artifacts::combine_options(self.file_paths, other.file_paths),
+        }
+    }
+}
+
+impl AddAssign for Artifacts {
+    fn add_assign(&mut self, other: Artifacts) {
+        self.urls = Artifacts::combine_options(self.urls.clone(), other.urls);
+        self.domains = Artifacts::combine_options(self.domains.clone(), other.domains);
+        self.emails = Artifacts::combine_options(self.emails.clone(), other.emails);
+        self.ip_address = Artifacts::combine_options(self.ip_address.clone(), other.ip_address);
+        self.crypto = Artifacts::combine_options(self.crypto.clone(), other.crypto);
+        self.registry_keys =
+            Artifacts::combine_options(self.registry_keys.clone(), other.registry_keys);
+        self.sql = Artifacts::combine_options(self.sql.clone(), other.sql);
+        self.regexes = Artifacts::combine_options(self.regexes.clone(), other.regexes);
+        self.file_paths = Artifacts::combine_options(self.file_paths.clone(), other.file_paths);
     }
 }
 
