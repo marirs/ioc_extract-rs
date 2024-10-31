@@ -2,6 +2,14 @@ use fancy_regex::Regex;
 use idna::domain_to_ascii;
 
 lazy_static! {
+    static ref NOT_DOMAINS: Vec<&'static str> = vec![
+        "System.Collections.IComparer.Compare",
+        "System.IO",
+        "System.Management",
+        "System.Net",
+        "System.Security"
+    ];
+    static ref DOMAIN_WHITELIST: Vec<&'static str> = vec!["localhost"];
     static ref DOMAIN: Regex = Regex::new(
         &[
             r"(?i)^(?:[a-zA-Z0-9]",                     // First character of the domain
@@ -10,7 +18,6 @@ lazy_static! {
             r"[A-Za-z]$",                               // Last character of the gTLD
         ].join("")
     ).unwrap();
-    static ref DOMAIN_WHITELIST: Vec<&'static str> = vec!["localhost"];
     static ref DOMAINS_EXT: Vec<String> = tld_download::from_db();
     static ref EMAIL: Regex = Regex::new(r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z0-9\-]*$").unwrap();
     static ref EMAIL_DOMAIN: Regex = Regex::new(
@@ -111,6 +118,17 @@ lazy_static! {
     ).unwrap();
 }
 
+fn is_domain_valid(domain: &str) -> bool {
+    if NOT_DOMAINS
+        .iter()
+        .any(|dom| domain.to_lowercase().eq(&dom.to_lowercase()))
+    {
+        false
+    } else {
+        true
+    }
+}
+
 fn is_tld_valid(domain: &str) -> bool {
     //! Checks to see if a Given Domain contains a valid tld like
     //! NO numbers or special characters or file extensions.
@@ -140,10 +158,8 @@ pub fn is_email(value: &str, whitelist: Option<Vec<&str>>) -> bool {
         return false;
     }
 
-    let whitelist = match whitelist {
-        Some(x) => x,
-        None => DOMAIN_WHITELIST.to_vec(),
-    };
+    let whitelist = whitelist.unwrap_or_else(|| DOMAIN_WHITELIST.to_vec());
+
     let parts: Vec<&str> = value.rsplitn(2, '@').collect();
     let user_part = parts[1];
     let domain_part = parts[0];
@@ -178,10 +194,24 @@ pub fn is_domain(value: &str) -> bool {
         Err(_) => return false,
     };
 
+    let period_count = x.chars().filter(|&c| c == '.').count();
+
     if DOMAIN.is_match(&x).unwrap_or_default()
         && DOMAINS_EXT.iter().any(|suffix| x.ends_with(suffix))
     {
-        return true;
+        if period_count > 1 {
+            // this looks like a .co.com or a .co.uk, etc tld's..
+            // or that it could also have sub tld's
+            // most likely the false positive in here might be less
+            return is_domain_valid(&x)
+        } else {
+            // some logic to reduce false positives,
+            // needs fine-tuning as we see more false positives
+            // will miss out on legitimate 2-letter / 3-letter domains
+            if x.len() > 7 {
+                return is_domain_valid(&x)
+            }
+        }
     }
 
     false
