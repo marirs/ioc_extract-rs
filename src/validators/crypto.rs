@@ -95,8 +95,10 @@ fn validate(value: &str) -> bool {
         && !ILLEGAL_CHARS.iter().any(|c| value.contains(c))
     {
         for cryptocurrency in Type::all() {
-            if cryptocurrency.pattern().is_match(value).unwrap() {
+            if let Ok(_) = cryptocurrency.pattern().is_match(value) {
                 return true;
+            } else {
+                return false;
             }
         }
     }
