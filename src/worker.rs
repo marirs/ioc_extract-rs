@@ -77,7 +77,11 @@ pub fn by_whitespace(s: String) -> WhitespaceResult {
         if network::is_ipv_any(x) || network::is_ip_cidr_any(x) {
             ip_address.push(x.to_string())
         } else if crypto::is_cryptocurrency_any(x) {
-            crypto_address.push(format!("{} - {}", x, which_cryptocurrency(x).unwrap()))
+            if let Some(coin) = which_cryptocurrency(x) {
+                crypto_address.push(format!("{} - {}", x, coin))
+            } else {
+                crypto_address.push("".to_string())
+            }
         } else if internet::is_domain(x) {
             domains.push(x.to_string())
         } else if let Some(url) = internet::get_url(x) {
